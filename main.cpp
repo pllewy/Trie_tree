@@ -119,22 +119,28 @@ bool my_predicate(char c) {
     return c < 'a' || c > 'z';
 }
 
-void massLoader(Node *root, string filename) {
+void massLoader(Node *root, string filename, int maxWords) {
+    maxWords *= 1000;
+    int count = 0;
     string ch;
+
     ifstream fin(filename, fstream::in);
     if (fin.is_open()) {
-        while (fin >> ch) {
+        while (fin >> ch && count < maxWords) {
             for (auto& x : ch)
                 x = tolower(x);
 
             ch.erase(std::remove_if(ch.begin(), ch.end(), my_predicate), ch.end());
 //            cout << ch << endl;
             Insert(root, ch);
+            count++;
         }
         fin.close();
     } else {
         cerr << "Unable to open the file for loading." << endl;
     }
+    if (count < maxWords)
+        cout << "Loaded: " << count << " words." << endl;
 }
 
 Node * loader(string filename) {
@@ -173,7 +179,7 @@ int main() {
 
     Node *root2 = loader("tree.txt");
 
-    massLoader(root2, "./data/rfc1.txt");
+    massLoader(root2, "./data/rfc1.txt", 15);
 
     cout << "Search" << endl;
     Search(root2, "abc");
