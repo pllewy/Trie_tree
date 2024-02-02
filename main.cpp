@@ -21,7 +21,7 @@ struct Trie {
 
     Trie() {
         root = new Node();
-        root->left = root->right = root;
+        root->left = root->right = nullptr;
         root->leaf = false;
         maxb = 4;
     }
@@ -74,24 +74,25 @@ void Insert(Trie *T, int v) {
 int main() {
 
 //    cout << bit(3,2) << endl;
-
-    cout << "Creating Trie" << endl;
     Trie myTrie = Trie();
-    cout << "Trie created" << endl;
-    // Insert some values into the trie
+
     Insert(&myTrie, 5);
     cout << "Inserted 5" << endl;
-    Insert(&myTrie, 3);
-    cout << "Inserted 3" << endl;
-    Insert(&myTrie, 9);
-    cout << "Inserted 9" << endl;
-    Insert(&myTrie, 1);
-    Insert(&myTrie, 7);
+
+    cout << "Nodes:" <<endl;
+    cout << myTrie.root << " " << myTrie.root->left << " " << myTrie.root->right << endl;
+
+//    Insert(&myTrie, 3);
+//    cout << "Inserted 3" << endl;
+//    Insert(&myTrie, 9);
+//    cout << "Inserted 9" << endl;
+//    Insert(&myTrie, 1);
+//    Insert(&myTrie, 7);
 
     // You can add more Insert calls to insert additional values
 
     // Print a message indicating successful insertion
-    std::cout << "Values inserted into the Trie." << std::endl;
+//    std::cout << "Values inserted into the Trie." << std::endl;
 
     return 0;
 }
