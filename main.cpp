@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -114,6 +115,28 @@ void saveManager(Node *root, string filename){
     }
 }
 
+bool my_predicate(char c) {
+    return c < 'a' || c > 'z';
+}
+
+void massLoader(Node *root, string filename) {
+    string ch;
+    ifstream fin(filename, fstream::in);
+    if (fin.is_open()) {
+        while (fin >> ch) {
+            for (auto& x : ch)
+                x = tolower(x);
+
+            ch.erase(std::remove_if(ch.begin(), ch.end(), my_predicate), ch.end());
+//            cout << ch << endl;
+            Insert(root, ch);
+        }
+        fin.close();
+    } else {
+        cerr << "Unable to open the file for loading." << endl;
+    }
+}
+
 Node * loader(string filename) {
     string ch;
     Node *root = new Node();
@@ -145,10 +168,12 @@ int main() {
 //    cout << countWords(root, count) << endl;
 
 
-    cout << "Save" << endl;
-    saveManager(root, "tree.txt");
+//    cout << "Save" << endl;
+//    saveManager(root, "tree.txt");
 
     Node *root2 = loader("tree.txt");
+
+    massLoader(root2, "./data/rfc1.txt");
 
     cout << "Search" << endl;
     Search(root2, "abc");
