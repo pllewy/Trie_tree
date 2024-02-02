@@ -1,98 +1,156 @@
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
 struct Node {
-    Node *left;
-    Node *right;
-    int key;
+    Node *children[27];
     bool leaf;
 
     Node() {
-        left = right = nullptr;
-        key = 0;
+        *children = {nullptr};
         leaf = true;
     }
 };
 
-struct Trie {
-    Node *root;
-    int maxb;
+void Insert(Node *root, string key) {
+    Node *x = root;
 
-    Trie() {
-        root = new Node();
-        root->left = root->right = nullptr;
-        root->leaf = false;
-        maxb = 4;
+    for (char i : key) {
+        int index = i - 'a';
+
+        if (!x->children[index]) {
+            x->children[index] = new Node();
+            x->leaf = false;
+        }
+        x = x->children[index];
     }
-};
-
-bool bit(int v, int b) {
-    return (v & (1 << b)) != 0;
+    x->leaf = true; // Ważne. Ustalamy flagę leaf niezależnie od tego, czy są dzieci, czy nie
 }
 
-void Insert(Trie *T, int v) {
-    int b = T->maxb;
-    Node *x = T->root;
-    Node *y = nullptr;
+bool Search(Node *root, string key) {
+    Node *x = root;
 
-    cout << "Inserting " << v << endl;
-    while(x != nullptr && x->key != v && b>0) {
-//        TODO pozbyć się b z whila, wskaźniki nie prowadzą
-        cout << b;
-        y = x;
-        if (bit(v, b)) {
-            cout << "turn right";
-            x = x->right;
-        } else {
-            cout << "turn left";
-            x = x->left;
+    for (char i : key) {
+        int index = i - 'a';
+
+        if (!x->children[index]) {
+            cout << "Not found" << endl;
+            return false;
         }
-        b--;
+        x = x->children[index];
+    }
+    // Jesteśmy na końcu słowa. Jeżeli są w słowniku słowa, które zaczynają się od tego słowa, to musimy w tym punkcie mieć flagę leaf true
+
+    if (x->leaf) {
+        cout << "Found" << endl;
+        return true;
+    } else {
+        cout << "Not found" << endl;
+        return false;
+    }
+}
+
+void Delete(Node *root, string key) {
+    Node *x = root;
+
+    for (char i : key) {
+        int index = i - 'a';
+
+        if (!x->children[index]) {
+            cout << "Not found" << endl;
+            return;
+        }
+        x = x->children[index];
+    }
+    // Jesteśmy na końcu słowa. Jeżeli są w słowniku słowa, które zaczynają się od tego słowa, to musimy w tym punkcie mieć flagę leaf true
+
+    if (x->leaf) {
+        cout << "Found" << endl;
+        x->leaf = false; // Usuwamy słowo — jedyna różnica z wyszukiwaniem
+    } else {
+        cout << "Not found" << endl;
+    }
+}
+
+int countWords(Node *root, int &count) {
+//    Sprawdź, czy jesteśmy na końcu słowa
+    if (root->leaf) {
+        count++;
     }
 
-    cout<<"after a while";
-
-    if (x == nullptr) {
-        Node *z = new Node();
-        z->key = v;
-        z->left = z -> right = nullptr;
-
-        if (y != nullptr) {
-            if (bit(v, b + 1)) {
-                y->right = z;
-            } else {
-                y->left = z;
-            }
-        }
-        else {
-            T->root = z;
+//    Rekurencyjnie przejdź po wszystkich poziomach
+    for (int i=0; i<27; i++) {
+        if (root->children[i]) {
+            countWords(root->children[i], count);
         }
     }
+    return count;
+}
+
+void saveTreeToFile(Node* root, ofstream& outFile, string s) {
+
+    if (root->leaf) {
+        outFile << s << endl;
+        return;
+    }
+
+    for (int i = 0; i < 27; i++) {
+        if (root->children[i]) {
+            saveTreeToFile(root->children[i], outFile, s + static_cast<char>('a' + i));
+        }
+    }
+
+}
+
+void saveManager(Node *root, string filename){
+    ofstream outFile(filename);
+    if (outFile.is_open()) {
+        saveTreeToFile(root, outFile, "");
+        outFile.close();
+        cout << "Tree saved to file successfully." << endl;
+    } else {
+        cerr << "Unable to open the file for saving." << endl;
+    }
+}
+
+Node * loader(string filename) {
+    string ch;
+    Node *root = new Node();
+
+    ifstream fin(filename, fstream::in);
+    if (fin.is_open()) {
+        while (fin >> ch) {
+            Insert(root, ch);
+        }
+        fin.close();
+    } else {
+        cerr << "Unable to open the file for loading." << endl;
+    }
+    return root;
 }
 
 int main() {
+    Node *root = new Node();
 
-//    cout << bit(3,2) << endl;
-    Trie myTrie = Trie();
+    Insert(root, "abc");
+    Insert(root, "bab");
+    Insert(root, "aba");
 
-    Insert(&myTrie, 5);
-    cout << "Inserted 5" << endl;
+//    cout << "Search" << endl;
+//    Search(root, "abc");
 
-    cout << "Nodes:" <<endl;
-    cout << myTrie.root << " " << myTrie.root->left << " " << myTrie.root->right << endl;
+//    cout << "Count" << endl;
+//    int count = 0;
+//    cout << countWords(root, count) << endl;
 
-//    Insert(&myTrie, 3);
-//    cout << "Inserted 3" << endl;
-//    Insert(&myTrie, 9);
-//    cout << "Inserted 9" << endl;
-//    Insert(&myTrie, 1);
-//    Insert(&myTrie, 7);
 
-    // You can add more Insert calls to insert additional values
+    cout << "Save" << endl;
+    saveManager(root, "tree.txt");
 
-    // Print a message indicating successful insertion
-//    std::cout << "Values inserted into the Trie." << std::endl;
+    Node *root2 = loader("tree.txt");
 
+    cout << "Search" << endl;
+    Search(root2, "abc");
     return 0;
 }
