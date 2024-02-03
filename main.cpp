@@ -123,6 +123,7 @@ void massLoader(Node *root, string filename, int maxWords) {
     maxWords *= 1000;
     int count = 0;
     string ch;
+//    cout << "Loading..." << endl;
 
     ifstream fin(filename, fstream::in);
     if (fin.is_open()) {
