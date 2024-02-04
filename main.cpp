@@ -8,7 +8,7 @@
 
 using namespace std;
 
-int MAXB = 80;
+int MAXB = 240;
 
 using namespace std;
 
@@ -88,10 +88,14 @@ bool PatriciaInsert(string v, Patricia_Node *root) {
         return false;
     }
     int i = MAXB;
-
+//    cout << endl;
+//    cout << "V: " << v << endl;
+//    cout << i << endl;
+//    cout << "T: " << t->key << endl;
     while (bit(v, i) == bit(t->key, i)) {
         i--;
     }
+
 //    cout << "I: " << i  << endl;
 
     Patricia_Node *y = root;
@@ -168,7 +172,7 @@ int countPatriciaWords(Patricia_Node *root, int &count, Patricia_Node *tree_root
 }
 
 Patricia_Node * Ploader(string filename) {
-    cout << "Loading..." << endl;
+//    cout << "Loading..." << endl;
     string ch;
     Patricia_Node *root;
     root = new Patricia_Node();
@@ -186,7 +190,9 @@ Patricia_Node * Ploader(string filename) {
             else if (ch.empty())
                 continue;
 
+//            cout << ch << "  " << stringToBinary(ch);
             PatriciaInsert( stringToBinary(ch), root);
+//            cout << " inserted" << endl;
         }
         fin.close();
     } else {
@@ -195,6 +201,7 @@ Patricia_Node * Ploader(string filename) {
     return root;
 }
 
+// TRIE
 struct Node {
     Node *children[27]{};
     bool leaf;
@@ -371,7 +378,6 @@ Node * loader(string filename) {
     } else {
         cerr << "Unable to open the file for loading." << endl;
     }
-    cout << "Loaded." << endl;
     return root;
 }
 
@@ -380,9 +386,9 @@ int main() {
     int c;
     int prepare_tree_level = 30; // 1000, 2000, 3000, 4000, 5000
     int prepare_test_level = 4; // 10, 100, 1000, 10000
-    int test_tree_level = 5;
-    int test_test_level = 3;
-    string work_mode = "testPatricia";
+    int test_tree_level = 30;
+    int test_test_level = 4;
+    string work_mode = "test";
 
     if(work_mode == "prepare") {
 
@@ -412,7 +418,7 @@ int main() {
         }
     }
 
-    if (work_mode == "testTrie") {
+    if (work_mode == "test") {
 
         Node *tree = new Node();
         int result_count = 0;
@@ -485,7 +491,7 @@ int main() {
         cout << endl << endl << "####################################################" << endl << endl;
 
     }
-    if(work_mode == "testPatricia"){
+    if(work_mode == "test"){
         int result_count = 0;
         string tree_path;
         string test_path;
@@ -496,6 +502,7 @@ int main() {
         string batch_label = "";
         int margin = 0;
         int column_width = 20;
+        string percent_label = "";
 
         //    TEST PATRICIA
         Patricia_Node *tree2;
@@ -512,9 +519,9 @@ int main() {
             tree_path = "./data/Trie/" + to_string(max_words * 1000) + ".txt";
             tree2 = Ploader(tree_path);
 
-            c = 0;
-            countPatriciaWords(tree2, c, tree2);
-            cout << "Words: " << c << endl;
+//            c = 0;
+//            countPatriciaWords(tree2, c, tree2);
+//            cout << "Words: " << c << endl;
 
 //            Get the size of the file
             ifstream file(tree_path, ios::binary | ios::ate);
@@ -529,45 +536,49 @@ int main() {
 
 //            CZĘŚĆ Z TESTAMI, DO ODKRYCIA PO NAPRAWIENIU ŁADOWANIA
 
-//            for (int z = 1; z <= test_test_level; z++) {
-//                auto start = std::chrono::high_resolution_clock::now();
-//                int num_of_tests = pow(10, z);
-//                test_path = "./data/tests/" + to_string(num_of_tests) + ".txt";
-//                result_count = 0;
-//
-////                cout<<endl;
-////                cout << "Tree: " << tree_path << endl;
-////                cout << "Test: " << test_path << endl;
-//
-//                ifstream fin(test_path, fstream::in);
-//                if (fin.is_open()) {
-//                    while (fin >> ch) {
-////                        cout << "Searching: " << ch << endl;
-//
-//                        if(stringToBinary(ch).length() >= std::numeric_limits<std::size_t>::max()-5){
-//                            cout << "String too long" << endl;
-//                            continue;
-//                        }
-//                        else if (PatriciaSearch(tree2, stringToBinary(ch))) {
-////                            cout << "Found: " << ch << endl;
-//                            result_count++;
-//                        }
-//                    }
-//                    fin.close();
-//                } else {
-//                    cerr << "Unable to open the file for loading." << endl;
-//                }
-//
-//                auto stop = std::chrono::high_resolution_clock::now();
-//                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-//
-////                result_procent = double (result_count)/(num_of_tests) * 100;
+            for (int z = 1; z <= test_test_level; z++) {
+                auto start = std::chrono::high_resolution_clock::now();
+                int num_of_tests = pow(10, z);
+                test_path = "./data/tests/" + to_string(num_of_tests) + ".txt";
+                result_count = 0;
+
+//                cout<<endl;
+//                cout << "Tree: " << tree_path << endl;
+//                cout << "Test: " << test_path << endl;
+
+                ifstream fin(test_path, fstream::in);
+                if (fin.is_open()) {
+                    while (fin >> ch) {
+
+                        if(stringToBinary(ch).length() >= std::numeric_limits<std::size_t>::max()-5){
+                            cout << "String too long" << endl;
+                            continue;
+                        }
+                        else {
+                            if (PatriciaSearch(tree2, stringToBinary(ch))) {
+                                result_count++;
+                            }
+                        }
+                    }
+                    fin.close();
+                } else {
+                    cerr << "Unable to open the file for loading." << endl;
+                }
+
+                auto stop = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+
+                result_procent = double (result_count)/(num_of_tests) * 100;
 //                result_procent = result_count;
-//
-//                batch_label = "[" + to_string(result_procent) + "%," + to_string(duration.count()) + "mis]";
-//                margin = column_width - batch_label.length();
-//                cout << string(margin/2, ' ') << batch_label << string(margin-margin/2, ' ');
-//            }
+
+                percent_label = to_string(result_procent).substr(0, 5);
+                batch_label = "[" + percent_label + "%," + to_string(duration.count()) + "mis]";
+
+                margin = column_width - batch_label.length();
+
+                cout << string(margin/2, ' ') << batch_label << string(margin-margin/2, ' ');
+
+            }
             cout << endl;
         } // end of test patricia
         cout << endl << endl << "####################################################" << endl << endl;
